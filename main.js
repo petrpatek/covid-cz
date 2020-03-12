@@ -37,9 +37,10 @@ Apify.main(async () => {
     let graphData = number.values.map((value, index) => ({value, date: new Date(number.dates[0])}));
 
     console.log(`Saving data.`);
+    const data = {totalTested: parseInt(number.totalTested.replace(",", ".")), infected: number.infected, lastUpdated: lastUpdatedParsed};
 
-    await dataset.pushData({totalTested: number.totalTested, infected: number.infected, lastUpdated: lastUpdatedParsed});
-    await Apify.pushData({totalTested: number.totalTested, infected: number.infected, lastUpdated: lastUpdatedParsed});
+    await dataset.pushData(data);
+    await Apify.pushData(dataset);
 
     console.log('Closing Puppeteer...');
     await browser.close();
