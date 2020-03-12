@@ -1,5 +1,7 @@
 const Apify = require('apify');
-
+const toNumber = (str)=>{
+    return parseInt(str.replace(",", ""))
+}
 Apify.main(async () => {
     const input = await Apify.getInput();
     const url = "https://datastudio.google.com/embed/reporting/d0af39ad-3513-4ab9-a202-4afed1f786e2/page/DzlHB";
@@ -17,7 +19,7 @@ Apify.main(async () => {
 
     await page.waitFor(() => $("kpimetric:contains(Celkový počet testovaných)"));
     page.on("console", (log) => console.log(log.text()));
-    const number = await page.evaluate(() => {
+    const extractedData = await page.evaluate(() => {
         const totalTested = $("div.kpi-label:contains(Celkový počet testovaných)").next().text().trim();
         const infected = $("div.kpi-label:contains(Aktuální počet infikovaných)").next().text().trim();
         const lastUpdated = $("font:contains(Poslední aktualizace)").text().trim();
@@ -33,11 +35,11 @@ Apify.main(async () => {
             lastUpdated
         }
     });
-    let lastUpdatedParsed = new Date(number.lastUpdated.replace("Poslední aktualizace ", "").split("v").join(" ")).toISOString();
-    let graphData = number.values.map((value, index) => ({value, date: new Date(number.dates[0])}));
+    let lastUpdatedParsed = new Date(extractedData.lastUpdated.replace("Poslední aktualizace ", "").split("v").join(" ")).toISOString();
+    let graphData = extractedData.values.map((value, index) => ({value, date: new Date(extractedData.dates[0])}));
 
     console.log(`Saving data.`);
-    const data = {totalTested: parseInt(number.totalTested.replace(",", ".")), infected: number.infected, lastUpdated: lastUpdatedParsed};
+    const data = {totalTested:toNumber(extractedData.totalTested), infected: toNumber(extractedData.infected), lastUpdated: lastUpdatedParsed};
 
     await dataset.pushData(data);
     await Apify.pushData(dataset);
