@@ -1,5 +1,5 @@
 const Apify = require('apify');
-const toNumber = (str)=>{
+const toNumber = (str) => {
     return parseInt(str.replace(",", ""))
 }
 Apify.main(async () => {
@@ -12,10 +12,7 @@ Apify.main(async () => {
     const page = await browser.newPage();
     await Apify.utils.puppeteer.injectJQuery(page);
     await page.goto(url, {waitUntil: "networkidle0"});
-    let dataset = await Apify.openDataset("COVID-19-CZECH");
-    await dataset.drop();
-    dataset = await Apify.openDataset("COVID-19-CZECH");
-
+    let kvStore = await Apify.openKeyValueStore("COVID-19-CZECH");
 
     await page.waitFor(() => $("kpimetric:contains(Celkový počet testovaných)"));
     page.on("console", (log) => console.log(log.text()));
@@ -39,10 +36,14 @@ Apify.main(async () => {
     let graphData = extractedData.values.map((value, index) => ({value, date: new Date(extractedData.dates[0])}));
 
     console.log(`Saving data.`);
-    const data = {totalTested:toNumber(extractedData.totalTested), infected: toNumber(extractedData.infected), lastUpdated: lastUpdatedParsed};
+    const data = {
+        totalTested: toNumber(extractedData.totalTested),
+        infected: toNumber(extractedData.infected),
+        lastUpdated: lastUpdatedParsed
+    };
 
-    await dataset.pushData(data);
-    await Apify.pushData(dataset);
+    await kvStore.setValue("LATEST", data);
+    await Apify.pushData(data);
 
     console.log('Closing Puppeteer...');
     await browser.close();
