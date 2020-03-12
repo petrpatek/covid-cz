@@ -10,7 +10,10 @@ Apify.main(async () => {
     const page = await browser.newPage();
     await Apify.utils.puppeteer.injectJQuery(page);
     await page.goto(url, {waitUntil: "networkidle0"});
-    const dataset = await Apify.openDataset("COVID-19-CZECH");
+    let dataset = await Apify.openDataset("COVID-19-CZECH");
+    await dataset.drop();
+    dataset = await Apify.openDataset("COVID-19-CZECH");
+
 
     await page.waitFor(() => $("kpimetric:contains(Celkový počet testovaných)"));
     page.on("console", (log) => console.log(log.text()));
