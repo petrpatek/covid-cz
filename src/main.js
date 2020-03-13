@@ -92,7 +92,7 @@ Apify.main(async () => {
         //numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
         sourceUrl: url,
         lastUpdatedAtSource: extractedData.lastUpdated,
-        lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())),
+        lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() +1, now.getMinutes())).toISOString(),
         readMe: "https://apify.com/petrpatek/covid-cz",
     };
 
