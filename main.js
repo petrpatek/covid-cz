@@ -23,23 +23,26 @@ Apify.main(async () => {
         const testedSubjectGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_2").parentElement;
         const values = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="14"]'));
         const dates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[transform]'));
+        const parts = lastUpdated.replace("Poslední aktualizace ", "").split("v");
+        const splited = parts[0].split(".");
+        let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`).toISOString();
 
         return {
             totalTested,
             infected,
             values: values.map(value => value.textContent),
             dates: dates.map(date => date.textContent),
-            lastUpdated
+            lastUpdated: lastUpdatedParsed
         }
     });
-    let lastUpdatedParsed = new Date(extractedData.lastUpdated.replace("Poslední aktualizace ", "").split("v").join(" ")).toISOString();
+
     let graphData = extractedData.values.map((value, index) => ({value, date: new Date(extractedData.dates[0])}));
 
     console.log(`Saving data.`);
     const data = {
         totalTested: toNumber(extractedData.totalTested),
         infected: toNumber(extractedData.infected),
-        lastUpdated: lastUpdatedParsed
+        lastUpdated: extractedData.lastUpdated
     };
 
     await kvStore.setValue("LATEST", data);
