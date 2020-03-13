@@ -9,7 +9,7 @@ Apify.main(async () => {
 
     console.log('Launching Puppeteer...');
 
-    const browser = await Apify.launchPuppeteer({headless: false, defaultViewport: {height: 1080, width: 1920}, useChrome: true});
+    const browser = await Apify.launchPuppeteer({headless: false, defaultViewport: {height: 1080, width: 1920}, useChrome: true, useApifyProxy: true, apifyProxyGroups: ["CZECH_LUMINATI"]});
 
     console.log(`Getting data from ${url}...`);
     const page = await browser.newPage();
@@ -28,7 +28,7 @@ Apify.main(async () => {
         const dates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[transform]'));
         const parts = lastUpdated.replace("Poslední aktualizace ", "").split("v");
         const splited = parts[0].split(".");
-        let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`).toISOString();
+        let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`);
 
         return {
             totalTested,
