@@ -28,7 +28,7 @@ Apify.main(async () => {
         const dates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[transform]'));
         const parts = lastUpdated.replace("Poslední aktualizace ", "").split("v");
         const splited = parts[0].split(".");
-        let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`);
+        let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`).toISOString();
 
         return {
             totalTested,
