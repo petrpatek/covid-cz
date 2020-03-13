@@ -1,12 +1,15 @@
 const Apify = require('apify');
 const toNumber = (str) => {
     return parseInt(str.replace(",", ""))
-}
+};
+
 Apify.main(async () => {
     const input = await Apify.getInput();
     const url = "https://datastudio.google.com/embed/reporting/d0af39ad-3513-4ab9-a202-4afed1f786e2/page/DzlHB";
+
     console.log('Launching Puppeteer...');
-    const browser = await Apify.launchPuppeteer({headless: true, launchPuppeteerOptions: {useApifyProxy: true}});
+
+    const browser = await Apify.launchPuppeteer({headless: false, defaultViewport: {height: 1080, width: 1920}, useChrome: true});
 
     console.log(`Getting data from ${url}...`);
     const page = await browser.newPage();
@@ -35,14 +38,20 @@ Apify.main(async () => {
             lastUpdated: lastUpdatedParsed
         }
     });
+    let startDate  = new Date(extractedData.dates[0].replace("20…", "2020"));
+    startDate = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() ));
 
-    let graphData = extractedData.values.map((value, index) => ({value, date: new Date(extractedData.dates[0])}));
+    let graphData = extractedData.values.map((value, index) => ({value, date: new Date( startDate.getTime()+ (24*60*60*1000) * index)}));
 
     console.log(`Saving data.`);
     const data = {
         totalTested: toNumber(extractedData.totalTested),
         infected: toNumber(extractedData.infected),
-        lastUpdated: extractedData.lastUpdated
+        testedCases: graphData,
+        sourceUrl: url,
+        lastUpdatedAtSource: extractedData.lastUpdated,
+        lastUpdatedAtApify: new Date(),
+        readMe: "https://apify.com/petrpatek/covid-cz",
     };
 
     await kvStore.setValue("LATEST", data);
