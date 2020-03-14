@@ -36,7 +36,7 @@ Apify.main(async () => {
     page.on("console", (log) => console.log(log.text()));
     await Apify.utils.sleep(10000);
     const extractedData = await page.evaluate(() => {
-        const totalTested = $("div.kpi-label:contains(Celkový počet testovaných)").next().text().trim();
+        const totalTested = $("div.kpi-label:contains(Celkový počet otestovaných)").next().text().trim();
         const infected = $("div.kpi-label:contains(Aktuální počet infikovaných)").next().text().trim();
         const lastUpdated = $("font:contains(Poslední aktualizace)").text().trim();
 
