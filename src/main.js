@@ -10,11 +10,16 @@ const connectDataFromGraph = (graphData) => {
         value,
         date: new Date(startDate.getTime() + (24 * 60 * 60 * 1000) * index)
     }));
-}
+};
+
+const LATEST = "LATEST";
 
 Apify.main(async () => {
     const input = await Apify.getInput();
     const url = "https://datastudio.google.com/embed/reporting/d0af39ad-3513-4ab9-a202-4afed1f786e2/page/DzlHB";
+    const kvStore = await Apify.openKeyValueStore("COVID-19-CZECH");
+    const dataset = await Apify.openDataset("COVID-19-CZECH-HISTORY");
+
 
     console.log('Launching Puppeteer...');
 
@@ -30,7 +35,6 @@ Apify.main(async () => {
     const page = await browser.newPage();
     await Apify.utils.puppeteer.injectJQuery(page);
     await page.goto(url, {waitUntil: "networkidle0", timeout: 60000});
-    let kvStore = await Apify.openKeyValueStore("COVID-19-CZECH");
 
     await page.waitFor(() => $("kpimetric:contains(Celkový počet testovaných)"));
     page.on("console", (log) => console.log(log.text()));
@@ -108,8 +112,19 @@ Apify.main(async () => {
         readMe: "https://apify.com/petrpatek/covid-cz",
     };
 
-    await kvStore.setValue("LATEST", data);
+    // Compare and save to history
+    const latest = await kvStore.getValue(LATEST);
+    delete latest.lastUpdatedAtApify;
+    const actual = Object.assign({}, data);
+    delete actual.lastUpdatedAtApify;
+
+    if(JSON.stringify(latest)!== JSON.stringify(actual)){
+        await dataset.pushData(data);
+    }
+
+    await kvStore.setValue(LATEST, data);
     await Apify.pushData(data);
+
 
     console.log('Closing Puppeteer...');
     await browser.close();
