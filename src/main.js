@@ -80,8 +80,9 @@ Apify.main(async () => {
         }
     });
 
-    console.log(`Saving data.`);
-    console.log(extractedData.numberOfTestedGraph);
+    console.log(`Processing and saving data.`);
+
+    extractedData.numberOfTestedGraph.dates[0] = `${extractedData.numberOfTestedGraph.dates[0]} 2020`;
     const now = new Date();
 
     const data = {
@@ -89,7 +90,7 @@ Apify.main(async () => {
         infected: toNumber(extractedData.infected),
         testedCases: connectDataFromGraph(extractedData.testedSubjectGraph),
         totalPositiveTests: connectDataFromGraph(extractedData.totalNumberPositiveGraph),
-        //numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
+        numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
         sourceUrl: url,
         lastUpdatedAtSource: extractedData.lastUpdated,
         lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() +1, now.getMinutes())).toISOString(),
