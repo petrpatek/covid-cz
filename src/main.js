@@ -1,4 +1,5 @@
 const Apify = require('apify');
+const cheerio = require("cheerio");
 const getDataFromIdnes = require("./idnes");
 const toNumber = (str) => {
     return parseInt(str.replace(",", ""))
@@ -16,12 +17,17 @@ const connectDataFromGraph = (graphData) => {
 const LATEST = "LATEST";
 
 Apify.main(async () => {
-    const url = "https://datastudio.google.com/embed/reporting/d0af39ad-3513-4ab9-a202-4afed1f786e2/page/DzlHB";
     const kvStore = await Apify.openKeyValueStore("COVID-19-CZECH");
     const dataset = await Apify.openDataset("COVID-19-CZECH-HISTORY");
 
-    console.log('Launching Puppeteer...');
+    const response = await Apify.utils.requestAsBrowser({
+        url:"https://onemocneni-aktualne.mzcr.cz/covid-19",
+        proxyUrl: Apify.getApifyProxyUrl({groups:["CZECH_LUMINATI"]}
+        )});
+    const $ = await cheerio.load(response.body);
+    const url = $("#covid-content").attr("data-report-url");
 
+    console.log('Launching Puppeteer...');
     const browser = await Apify.launchPuppeteer({
         headless: false,
         defaultViewport: {height: 1080, width: 1920},
@@ -35,30 +41,30 @@ Apify.main(async () => {
     await Apify.utils.puppeteer.injectJQuery(page);
     await page.goto(url, {waitUntil: "networkidle0", timeout: 60000});
 
-    await page.waitFor(() => $("kpimetric:contains(Celkový počet testovaných)"));
+    await page.waitFor(() => $("kpimetric:contains(Celkový počet provedených testů)"));
     page.on("console", (log) => console.log(log.text()));
     await Apify.utils.sleep(10000);
     const extractedData = await page.evaluate(() => {
-        const totalTested = $("div.kpi-label:contains(Celkový počet otestovaných)").next().text().trim();
-        const infected = $("div.kpi-label:contains(Aktuální počet infikovaných)").next().text().trim();
+        const totalTested = $("div.kpi-label:contains(Celkový počet provedených testů)").next().text().trim();
+        const infected = $("div.kpi-label:contains(Celkový počet osob s COVID-19)").next().text().trim();
         const lastUpdated = document.querySelector('.cell[style="background-color: transparent; color: rgb(102, 102, 102); border-bottom-color: transparent; text-align: left; min-width: 160px; width: 160px;"]').textContent
 
         // Počet testovaných případů
-        const testedSubjectGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_2").parentElement;
+        const testedSubjectGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_0").parentElement;
         const testedSubjectGraphValues = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="14"]'));
         const testedSubjectGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[transform]'));
 
         // Celkový počet pozitivních případů
-        const totalNumberPositiveGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_4").parentElement;
+        const totalNumberPositiveGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_2").parentElement;
         const totalNumberPositiveGraphValues = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="14"]'));
         const totalNumberPositiveGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[transform]'));
 
         // Počet testovaných případů
-        const numberTestedGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_6").parentElement;
+        const numberTestedGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_4").parentElement;
         const numberTestedGraphValues = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="14"]'));
         const numberTestedGraphDates = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
-        const infectedByRegionGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_10").parentElement;
+        const infectedByRegionGraph = document.querySelector('svg[width="610"]');
         const infectedByRegionValues = Array.from(infectedByRegionGraph.children[2].querySelectorAll('text[text-anchor="middle"]'));
         const infectedByRegionRegions = Array.from(infectedByRegionGraph.children[2].querySelectorAll('text[text-anchor="end"]')).slice(0, 14);
 
