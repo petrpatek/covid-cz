@@ -42,7 +42,7 @@ Apify.main(async () => {
     const extractedData = await page.evaluate(() => {
         const totalTested = $("div.kpi-label:contains(Celkový počet otestovaných)").next().text().trim();
         const infected = $("div.kpi-label:contains(Aktuální počet infikovaných)").next().text().trim();
-        const lastUpdated = $("font:contains(Poslední aktualizace)").text().trim();
+        const lastUpdated = document.querySelector('.cell[style="background-color: transparent; color: rgb(102, 102, 102); border-bottom-color: transparent; text-align: left; min-width: 160px; width: 160px;"]').textContent
 
         // Počet testovaných případů
         const testedSubjectGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_2").parentElement;
@@ -64,7 +64,7 @@ Apify.main(async () => {
         const infectedByRegionRegions = Array.from(infectedByRegionGraph.children[2].querySelectorAll('text[text-anchor="end"]')).slice(0, 14);
 
 
-        const parts = lastUpdated.replace("Poslední aktualizace ", "").split("v");
+        const parts = lastUpdated.split("v");
         const splited = parts[0].split(".");
         let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`);
         lastUpdatedParsed = new Date(Date.UTC(lastUpdatedParsed.getFullYear(), lastUpdatedParsed.getMonth(), lastUpdatedParsed.getDate(), lastUpdatedParsed.getHours(), lastUpdatedParsed.getMinutes()));
