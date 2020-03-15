@@ -1,4 +1,5 @@
 const Apify = require('apify');
+const getDataFromIdnes = require("./idnes");
 const toNumber = (str) => {
     return parseInt(str.replace(",", ""))
 };
@@ -15,11 +16,9 @@ const connectDataFromGraph = (graphData) => {
 const LATEST = "LATEST";
 
 Apify.main(async () => {
-    const input = await Apify.getInput();
     const url = "https://datastudio.google.com/embed/reporting/d0af39ad-3513-4ab9-a202-4afed1f786e2/page/DzlHB";
     const kvStore = await Apify.openKeyValueStore("COVID-19-CZECH");
     const dataset = await Apify.openDataset("COVID-19-CZECH-HISTORY");
-
 
     console.log('Launching Puppeteer...');
 
@@ -112,13 +111,22 @@ Apify.main(async () => {
         readMe: "https://apify.com/petrpatek/covid-cz",
     };
 
+    // Data from idnes - They have newer numbers than MZCR...
+    const idnesData = await getDataFromIdnes();
+    data.fromBabisNewspapers = {
+        ...idnesData
+    };
+
+
+
+
     // Compare and save to history
     const latest = await kvStore.getValue(LATEST);
     delete latest.lastUpdatedAtApify;
     const actual = Object.assign({}, data);
     delete actual.lastUpdatedAtApify;
 
-    if(JSON.stringify(latest)!== JSON.stringify(actual)){
+    if (JSON.stringify(latest) !== JSON.stringify(actual)) {
         await dataset.pushData(data);
     }
 
