@@ -46,21 +46,21 @@ Apify.main(async () => {
     await Apify.utils.sleep(10000);
     const extractedData = await page.evaluate(() => {
         const totalTested = $("div.kpi-label:contains(Celkový počet provedených testů)").next().text().trim();
-        const infected = $("div.kpi-label:contains(Celkový počet osob s COVID-19)").next().text().trim();
+        const infected = $("div.kpi-label:contains(Celkový počet osob s prokázanou nákazou COVID-19)").next().text().trim();
         const lastUpdated = document.querySelector('.cell[style="background-color: transparent; color: rgb(102, 102, 102); border-bottom-color: transparent; text-align: left; min-width: 160px; width: 160px;"]').textContent
 
         // Počet testovaných případů
-        const testedSubjectGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_0").parentElement;
+        const testedSubjectGraph = document.querySelector('svg[width="1129"][height="275"]');
         const testedSubjectGraphValues = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="14"]'));
-        const testedSubjectGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[transform]'));
+        const testedSubjectGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
         // Celkový počet pozitivních případů
-        const totalNumberPositiveGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_2").parentElement;
+        const totalNumberPositiveGraph = document.querySelector('svg[width="1129"][height="264"]');
         const totalNumberPositiveGraphValues = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="14"]'));
-        const totalNumberPositiveGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[transform]'));
+        const totalNumberPositiveGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
         // Počet testovaných případů
-        const numberTestedGraph = document.querySelector("#_ABSTRACT_RENDERER_ID_4").parentElement;
+        const numberTestedGraph = document.querySelector('svg[width="1129"][height="313"]');
         const numberTestedGraphValues = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="14"]'));
         const numberTestedGraphDates = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
