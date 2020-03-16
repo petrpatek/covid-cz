@@ -106,9 +106,9 @@ Apify.main(async () => {
     extractedData.totalNumberPositiveGraph.dates[0] = `${extractedData.totalNumberPositiveGraph.dates[0]} 2020`;
     const now = new Date();
     const data = {
-        totalTested: toNumber(totalTested),
-        infected: toNumber(infected),
-        recovered: toNumber(recovered),
+        totalTested: toNumber(totalTested.replace(" ", "")),
+        infected: toNumber(infected.replace(" ", "")),
+        recovered: toNumber(recovered.replace(" ", "")),
         testedCases: connectDataFromGraph(extractedData.testedSubjectGraph),
         totalPositiveTests: connectDataFromGraph(extractedData.totalNumberPositiveGraph),
         numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
