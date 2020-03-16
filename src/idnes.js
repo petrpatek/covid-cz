@@ -12,9 +12,11 @@ const getDataFromIdnes = async ()=>{
         const {body: {root}} = response;
         const totalInfected = root.find(data => data.hasOwnProperty("nakazenych"));
         const totalDeaths = root.find(data => data.hasOwnProperty("mrtvych"));
+        const totalCured = root.find(data => data.hasOwnProperty("uzdravenych"));
         infectedByBabisNewspapers = {
             totalInfected: parseInt(totalInfected.nakazenych, 10),
             totalDeaths: parseInt(totalDeaths.mrtvych, 10),
+            totalCured: parseInt(totalCured.uzdravenych, 10),
         }
     } catch (e) {
         console.log("Could not get data from Idnes", e);
