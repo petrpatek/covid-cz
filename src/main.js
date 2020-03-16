@@ -27,6 +27,9 @@ Apify.main(async () => {
     });
     const $ = await cheerio.load(response.body);
     const url = $("#covid-content").attr("data-report-url");
+    const totalTested = $("#count-test").text().trim();
+    const infected = $("#count-sick").text().trim();
+    const recovered = $("#count-recover").text().trim();
     const lastUpdated = $(".pr-15").eq(0).text().trim().replace("Poslední aktualizace: ", "").replace(/\u00a0/g, "");
     console.log(lastUpdated);
     const parts = lastUpdated.split("v");
@@ -40,7 +43,7 @@ Apify.main(async () => {
         headless: false,
         defaultViewport: {height: 1080, width: 1920},
         useChrome: true,
-        useApifyProxy: false,
+        useApifyProxy: true,
         apifyProxyGroups: ["CZECH_LUMINATI"]
     });
 
@@ -53,11 +56,6 @@ Apify.main(async () => {
     page.on("console", (log) => console.log(log.text()));
     await Apify.utils.sleep(10000);
     const extractedData = await page.evaluate(() => {
-        const totalTested = $("#count-test").text().trim();
-        const infected = $("#count-sick").text().trim();
-        const recovered = $("#count-recover").text().trim();
-        console.log("Got Basic info.");
-
         // Počet testovaných případů
         const testedSubjectGraph = document.querySelector('svg[width="1121"][height="275"]');
         const testedSubjectGraphValues = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="14"]'));
@@ -83,9 +81,6 @@ Apify.main(async () => {
         }
 
         return {
-            totalTested,
-            infected,
-            recovered,
             testedSubjectGraph: {
                 values: testedSubjectGraphValues.map(value => value.textContent),
                 dates: testedSubjectGraphDates.map(date => date.textContent),
@@ -111,9 +106,9 @@ Apify.main(async () => {
     extractedData.totalNumberPositiveGraph.dates[0] = `${extractedData.totalNumberPositiveGraph.dates[0]} 2020`;
     const now = new Date();
     const data = {
-        totalTested: toNumber(extractedData.totalTested),
-        infected: toNumber(extractedData.infected),
-        recovered: toNumber(extractedData.recovered),
+        totalTested: toNumber(totalTested),
+        infected: toNumber(infected),
+        recovered: toNumber(recovered),
         testedCases: connectDataFromGraph(extractedData.testedSubjectGraph),
         totalPositiveTests: connectDataFromGraph(extractedData.totalNumberPositiveGraph),
         numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
