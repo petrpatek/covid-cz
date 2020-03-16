@@ -21,18 +21,26 @@ Apify.main(async () => {
     const dataset = await Apify.openDataset("COVID-19-CZECH-HISTORY");
 
     const response = await Apify.utils.requestAsBrowser({
-        url:"https://onemocneni-aktualne.mzcr.cz/covid-19",
-        proxyUrl: Apify.getApifyProxyUrl({groups:["CZECH_LUMINATI"]}
-        )});
+        url: "https://onemocneni-aktualne.mzcr.cz/covid-19",
+        proxyUrl: Apify.getApifyProxyUrl({groups: ["CZECH_LUMINATI"]}
+        )
+    });
     const $ = await cheerio.load(response.body);
     const url = $("#covid-content").attr("data-report-url");
+    const lastUpdated = $(".pr-15").eq(0).text().trim().replace("Poslední aktualizace: ", "").replace(/\u00a0/g, "");
+    console.log(lastUpdated);
+    const parts = lastUpdated.split("v");
+    const splited = parts[0].split(".");
+    let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`);
+    lastUpdatedParsed = new Date(Date.UTC(lastUpdatedParsed.getFullYear(), lastUpdatedParsed.getMonth(), lastUpdatedParsed.getDate(), lastUpdatedParsed.getHours(), lastUpdatedParsed.getMinutes()));
+
 
     console.log('Launching Puppeteer...');
     const browser = await Apify.launchPuppeteer({
         headless: false,
         defaultViewport: {height: 1080, width: 1920},
         useChrome: true,
-        useApifyProxy: true,
+        useApifyProxy: false,
         apifyProxyGroups: ["CZECH_LUMINATI"]
     });
 
@@ -45,17 +53,18 @@ Apify.main(async () => {
     page.on("console", (log) => console.log(log.text()));
     await Apify.utils.sleep(10000);
     const extractedData = await page.evaluate(() => {
-        const totalTested = $("div.kpi-label:contains(Celkový počet provedených testů)").next().text().trim();
-        const infected = $("div.kpi-label:contains(Celkový počet osob s prokázanou nákazou COVID-19)").next().text().trim();
-        const lastUpdated = document.querySelector('.cell[style="background-color: transparent; color: rgb(102, 102, 102); border-bottom-color: transparent; text-align: left; min-width: 160px; width: 160px;"]').textContent
+        const totalTested = $("#count-test").text().trim();
+        const infected = $("#count-sick").text().trim();
+        const recovered = $("#count-recover").text().trim();
+        console.log("Got Basic info.");
 
         // Počet testovaných případů
-        const testedSubjectGraph = document.querySelector('svg[width="1129"][height="275"]');
+        const testedSubjectGraph = document.querySelector('svg[width="1121"][height="275"]');
         const testedSubjectGraphValues = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="14"]'));
         const testedSubjectGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
         // Celkový počet pozitivních případů
-        const totalNumberPositiveGraph = document.querySelector('svg[width="1129"][height="264"]');
+        const totalNumberPositiveGraph = document.querySelector('svg[width="1106"][height="264"]');
         const totalNumberPositiveGraphValues = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="14"]'));
         const totalNumberPositiveGraphDates = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="12"]'));
 
@@ -65,18 +74,18 @@ Apify.main(async () => {
         const numberTestedGraphDates = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
         const infectedByRegionGraph = document.querySelector('svg[width="610"]');
-        const infectedByRegionValues = Array.from(infectedByRegionGraph.children[2].querySelectorAll('text[text-anchor="middle"]'));
-        const infectedByRegionRegions = Array.from(infectedByRegionGraph.children[2].querySelectorAll('text[text-anchor="end"]')).slice(0, 14);
+        let infectedByRegionValues;
+        let infectedByRegionRegions;
 
-
-        const parts = lastUpdated.split("v");
-        const splited = parts[0].split(".");
-        let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`);
-        lastUpdatedParsed = new Date(Date.UTC(lastUpdatedParsed.getFullYear(), lastUpdatedParsed.getMonth(), lastUpdatedParsed.getDate(), lastUpdatedParsed.getHours(), lastUpdatedParsed.getMinutes()));
+        if (infectedByRegionGraph) {
+            infectedByRegionValues = Array.from(infectedByRegionGraph.children[2].querySelectorAll('text[text-anchor="middle"]'));
+            infectedByRegionRegions = Array.from(infectedByRegionGraph.children[2].querySelectorAll('text[text-anchor="end"]')).slice(0, 14);
+        }
 
         return {
             totalTested,
             infected,
+            recovered,
             testedSubjectGraph: {
                 values: testedSubjectGraphValues.map(value => value.textContent),
                 dates: testedSubjectGraphDates.map(date => date.textContent),
@@ -89,11 +98,10 @@ Apify.main(async () => {
                 values: numberTestedGraphValues.map(value => value.textContent),
                 dates: numberTestedGraphDates.map(value => value.textContent),
             },
-            lastUpdated: lastUpdatedParsed.toISOString(),
-            infectedByRegionGraph: {
+            infectedByRegionGraph: infectedByRegionGraph ? {
                 values: infectedByRegionValues.map(value => value.textContent),
                 regions: infectedByRegionRegions.map(value => value.textContent),
-            }
+            } : null,
         }
     });
 
@@ -105,15 +113,16 @@ Apify.main(async () => {
     const data = {
         totalTested: toNumber(extractedData.totalTested),
         infected: toNumber(extractedData.infected),
+        recovered: toNumber(extractedData.recovered),
         testedCases: connectDataFromGraph(extractedData.testedSubjectGraph),
         totalPositiveTests: connectDataFromGraph(extractedData.totalNumberPositiveGraph),
         numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
-        infectedByRegion: extractedData.infectedByRegionGraph.values.map((value, index) => ({
+        infectedByRegion: extractedData.infectedByRegionGraph ? extractedData.infectedByRegionGraph.values.map((value, index) => ({
             value,
             region: extractedData.infectedByRegionGraph.regions[index]
-        })),
+        })) : null,
         sourceUrl: url,
-        lastUpdatedAtSource: extractedData.lastUpdated,
+        lastUpdatedAtSource: lastUpdatedParsed.toISOString(),
         lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, now.getMinutes())).toISOString(),
         readMe: "https://apify.com/petrpatek/covid-cz",
     };
@@ -123,8 +132,6 @@ Apify.main(async () => {
     data.fromBabisNewspapers = {
         ...idnesData
     };
-
-
 
 
     // Compare and save to history
