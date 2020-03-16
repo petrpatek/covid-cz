@@ -57,7 +57,7 @@ Apify.main(async () => {
         // Celkový počet pozitivních případů
         const totalNumberPositiveGraph = document.querySelector('svg[width="1129"][height="264"]');
         const totalNumberPositiveGraphValues = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="14"]'));
-        const totalNumberPositiveGraphDates = Array.from(totalNumberPositiveGraph.children[2].querySelectorAll('text[font-size="12"]'));
+        const totalNumberPositiveGraphDates = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="12"]'));
 
         // Počet testovaných případů
         const numberTestedGraph = document.querySelector('svg[width="1129"][height="313"]');
@@ -99,7 +99,6 @@ Apify.main(async () => {
 
     console.log(`Processing and saving data.`);
 
-    console.log(extractedData.totalNumberPositiveGraph);
     extractedData.numberOfTestedGraph.dates[0] = `${extractedData.numberOfTestedGraph.dates[0]} 2020`;
     extractedData.totalNumberPositiveGraph.dates[0] = `${extractedData.totalNumberPositiveGraph.dates[0]} 2020`;
     const now = new Date();
