@@ -31,11 +31,10 @@ Apify.main(async () => {
     const infected = $("#count-sick").text().trim();
     const recovered = $("#count-recover").text().trim();
     const lastUpdated = $(".pr-15").eq(0).text().trim().replace("Poslední aktualizace: ", "").replace(/\u00a0/g, "");
-    console.log(lastUpdated);
     const parts = lastUpdated.split("v");
     const splited = parts[0].split(".");
     let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`);
-    lastUpdatedParsed = new Date(Date.UTC(lastUpdatedParsed.getFullYear(), lastUpdatedParsed.getMonth(), lastUpdatedParsed.getDate(), lastUpdatedParsed.getHours(), lastUpdatedParsed.getMinutes()));
+    lastUpdatedParsed = new Date(Date.UTC(lastUpdatedParsed.getFullYear(), lastUpdatedParsed.getMonth(), lastUpdatedParsed.getDate(), lastUpdatedParsed.getHours() - 1, lastUpdatedParsed.getMinutes()));
 
 
     console.log('Launching Puppeteer...');
@@ -118,7 +117,7 @@ Apify.main(async () => {
         })) : null,
         sourceUrl: url,
         lastUpdatedAtSource: lastUpdatedParsed.toISOString(),
-        lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, now.getMinutes())).toISOString(),
+        lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() -1, now.getMinutes())).toISOString(),
         readMe: "https://apify.com/petrpatek/covid-cz",
     };
 
