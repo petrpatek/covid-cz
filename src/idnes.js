@@ -5,7 +5,7 @@ const getDataFromIdnes = async ()=>{
     try {
         const response = await Apify.utils.requestAsBrowser({
             url: "https://servis.idnes.cz/includetojson.aspx?inc=sph/mega_box_top_koronavirus.htm",
-            proxyUrl: Apify.getApifyProxyUrl({groups: ["CZECH_LUMINATI"]}),
+            proxyUrl: Apify.getApifyProxyUrl({groups: ["SHADER"]}),
             abortFunction: () => false,
             json:true,
         });

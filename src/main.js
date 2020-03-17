@@ -22,7 +22,7 @@ Apify.main(async () => {
 
     const response = await Apify.utils.requestAsBrowser({
         url: "https://onemocneni-aktualne.mzcr.cz/covid-19",
-        proxyUrl: Apify.getApifyProxyUrl({groups: ["CZECH_LUMINATI"]}
+        proxyUrl: Apify.getApifyProxyUrl({groups: ["SHADER"]}
         )
     });
     const $ = await cheerio.load(response.body);
