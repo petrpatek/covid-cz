@@ -61,12 +61,12 @@ Apify.main(async () => {
         const testedSubjectGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
         // Celkový počet pozitivních případů
-        const totalNumberPositiveGraph = document.querySelector('svg[width="1106"][height="296"]');
+        const totalNumberPositiveGraph = document.querySelector('svg[width="1200"][height="289"]');
         const totalNumberPositiveGraphValues = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="14"]'));
         const totalNumberPositiveGraphDates = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="12"]'));
 
         // Počet testovaných případů
-        const numberTestedGraph = document.querySelector('svg[width="1129"][height="313"]');
+        const numberTestedGraph = document.querySelector('svg[width="1200"][height="313"]');
         const numberTestedGraphValues = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="14"]'));
         const numberTestedGraphDates = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
