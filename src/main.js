@@ -2,7 +2,7 @@ const Apify = require('apify');
 const cheerio = require("cheerio");
 const getDataFromIdnes = require("./idnes");
 const toNumber = (str) => {
-    return parseInt(str.replace(",", ""))
+    return parseInt(str.replace(",", ""), 10)
 };
 
 const parseDateToUTC = (dateString) => {
@@ -33,7 +33,7 @@ Apify.main(async () => {
     const $ = await cheerio.load(response.body);
     const url = $("#covid-content").attr("data-report-url");
     const totalTested = $("#count-test").text().trim();
-    const infected = $("#count-sick").text().trim();
+    const infected = $("p#count-sick").eq(0).text().trim();
     const recovered = $("#count-recover").text().trim();
     const lastUpdated = $("#last-modified-datetime").text().trim().replace("Poslední aktualizace: ", "").replace(/\u00a0/g, "");
     const parts = lastUpdated.split("v");
@@ -48,7 +48,7 @@ Apify.main(async () => {
     const now = new Date();
     const data = {
         totalTested: toNumber(totalTested.replace(" ", "")),
-        infected: toNumber(infected.replace(" ", "")),
+        infected: toNumber(infected),
         recovered: toNumber(recovered.replace(" ", "")),
         totalPositiveTests: connectDataFromGraph(infectedData),
         numberOfTestedGraph: connectDataFromGraph(numberOfTestedData),
