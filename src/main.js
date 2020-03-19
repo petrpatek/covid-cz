@@ -61,14 +61,14 @@ Apify.main(async () => {
         const testedSubjectGraphDates = Array.from(testedSubjectGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
         // Celkový počet pozitivních případů
-        const totalNumberPositiveGraph = document.querySelector('svg[width="1200"][height="255"]');
+        const totalNumberPositiveGraph = document.querySelector('svg[width="1200"][height="289"]');
         const totalNumberPositiveGraphValues = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="14"]'));
         const totalNumberPositiveGraphDates = Array.from(totalNumberPositiveGraph.children[1].querySelectorAll('text[font-size="12"]'));
 
-        // Počet testovaných případů
-        const numberTestedGraph = document.querySelector('svg[width="1200"][height="313"]');
-        const numberTestedGraphValues = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="14"]'));
-        const numberTestedGraphDates = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="12"]'));
+        // // Počet testovaných případů
+        // const numberTestedGraph = document.querySelector('svg[width="1200"][height="313"]');
+        // const numberTestedGraphValues = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="14"]'));
+        // const numberTestedGraphDates = Array.from(numberTestedGraph.children[2].querySelectorAll('text[font-size="12"]'));
 
         const infectedByRegionGraph = document.querySelector('svg[width="610"]');
         let infectedByRegionValues;
@@ -88,10 +88,10 @@ Apify.main(async () => {
                 values: totalNumberPositiveGraphValues.map(value => value.textContent),
                 dates: totalNumberPositiveGraphDates.map(value => value.textContent)
             },
-            numberOfTestedGraph: {
-                values: numberTestedGraphValues.map(value => value.textContent),
-                dates: numberTestedGraphDates.map(value => value.textContent),
-            },
+            // numberOfTestedGraph: {
+            //     values: numberTestedGraphValues.map(value => value.textContent),
+            //     dates: numberTestedGraphDates.map(value => value.textContent),
+            // },
             infectedByRegionGraph: infectedByRegionGraph ? {
                 values: infectedByRegionValues.map(value => value.textContent),
                 regions: infectedByRegionRegions.map(value => value.textContent),
@@ -101,7 +101,7 @@ Apify.main(async () => {
 
     console.log(`Processing and saving data.`);
 
-    extractedData.numberOfTestedGraph.dates[0] = `${extractedData.numberOfTestedGraph.dates[0]} 2020`;
+    //extractedData.numberOfTestedGraph.dates[0] = `${extractedData.numberOfTestedGraph.dates[0]} 2020`;
     extractedData.totalNumberPositiveGraph.dates[0] = `${extractedData.totalNumberPositiveGraph.dates[0]} 2020`;
     const now = new Date();
     const data = {
@@ -110,7 +110,7 @@ Apify.main(async () => {
         recovered: toNumber(recovered.replace(" ", "")),
         testedCases: connectDataFromGraph(extractedData.testedSubjectGraph),
         totalPositiveTests: connectDataFromGraph(extractedData.totalNumberPositiveGraph),
-        numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
+        //numberOfTestedGraph: connectDataFromGraph(extractedData.numberOfTestedGraph),
         infectedByRegion: extractedData.infectedByRegionGraph ? extractedData.infectedByRegionGraph.values.map((value, index) => ({
             value,
             region: extractedData.infectedByRegionGraph.regions[index]
