@@ -63,7 +63,6 @@ Apify.main(async () => {
         });
         tableData.push(rowData);
     });
-    console.log(tableData);
 
     const splited = parts[0].split(".");
     let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1].replace("h", "").replace(".", ":")}`);
