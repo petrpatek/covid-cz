@@ -40,6 +40,30 @@ Apify.main(async () => {
     const infectedData = JSON.parse($("#js-cummulative-total-persons-data").attr("data-linechart"));
     const numberOfTestedData = JSON.parse($("#js-cummulative-total-tests-data").attr("data-linechart"));
     const infectedByRegionData = JSON.parse($("#js-region-map-data").attr("data-map"));
+    const infectedDailyData = JSON.parse($("#js-total-persons-data").attr("data-barchart"));
+    const regionQuarantineData = JSON.parse($("#js-region-quarantine-data").attr("data-barchart"));
+    const regionQuarantine = regionQuarantineData.map(val => ({
+        reportDate: parseDateToUTC(val.key.replace("Hlášení k ", "")).toISOString(),
+        regionData: val.values.map(({x, y}) => ({regionName: x, value: y}))
+    }));
+    const sourceOfInfectionData = JSON.parse($("#js-total-foreign-countries-data").attr("data-barchart"));
+    const sexAgeData = JSON.parse($("#js-total-sex-age-data").attr("data-barchart"));
+    const protectionSuppliesSummaryTable = $(".static-table__container table");
+
+    // Table with supplies
+    const headers = [];
+    const tableData = [];
+    $(protectionSuppliesSummaryTable).find("thead th").each((idex, element)=>{
+        headers.push($(element).text().trim())
+    });
+    $(protectionSuppliesSummaryTable).find("tbody tr").each((index, element)=>{
+        const rowData = {};
+        $(element).find("td").each((i, el)=>{
+            rowData[headers[i]] = toNumber($(el).text().trim());
+        });
+        tableData.push(rowData);
+    });
+    console.log(tableData);
 
     const splited = parts[0].split(".");
     let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1].replace("h", "").replace(".", ":")}`);
@@ -53,6 +77,16 @@ Apify.main(async () => {
         totalPositiveTests: connectDataFromGraph(infectedData),
         numberOfTestedGraph: connectDataFromGraph(numberOfTestedData),
         infectedByRegion: infectedByRegionData.map(({name, value}) => ({name, value})),
+        infectedDaily: connectDataFromGraph(infectedDailyData),
+        regionQuarantine,
+        countryOfInfection: sourceOfInfectionData.values.map((value) => ({countryName: value.x, value: value.y})),
+        infectedByAgeSex: sexAgeData.map((sexData) => ({
+            sex: sexData.key,
+            infectedByAge: sexData.values.map(({x, y}) => ({
+                age: x,
+                value: y,
+            })),
+        })),
         sourceUrl: url,
         lastUpdatedAtSource: lastUpdatedParsed.toISOString(),
         lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
