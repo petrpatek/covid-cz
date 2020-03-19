@@ -33,7 +33,7 @@ Apify.main(async () => {
     const lastUpdated = $(".pr-15").eq(0).text().trim().replace("Poslední aktualizace: ", "").replace(/\u00a0/g, "");
     const parts = lastUpdated.split("v");
     const splited = parts[0].split(".");
-    let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1]}`);
+    let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1].replace("h", "").replace(".", ":")}`);
     lastUpdatedParsed = new Date(Date.UTC(lastUpdatedParsed.getFullYear(), lastUpdatedParsed.getMonth(), lastUpdatedParsed.getDate(), lastUpdatedParsed.getHours() - 1, lastUpdatedParsed.getMinutes()));
 
 
