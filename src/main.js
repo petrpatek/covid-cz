@@ -100,7 +100,11 @@ Apify.main(async () => {
 
 
     // Compare and save to history
-    const latest = await kvStore.getValue(LATEST);
+    let latest = await kvStore.getValue(LATEST);
+    if (!latest) {
+        await kvStore.setValue('LATEST', data);
+        latest = data;
+    }
     delete latest.lastUpdatedAtApify;
     const actual = Object.assign({}, data);
     delete actual.lastUpdatedAtApify;
@@ -109,8 +113,7 @@ Apify.main(async () => {
         await dataset.pushData(data);
     }
 
-    await kvStore.setValue(LATEST, data);
+    await kvStore.setValue('LATEST', data);
     await Apify.pushData(data);
-
     console.log('Done.');
 });
