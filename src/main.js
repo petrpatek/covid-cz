@@ -41,7 +41,7 @@ Apify.main(async () => {
     const numberOfTestedData = JSON.parse($("#js-cummulative-total-tests-data").attr("data-linechart"));
     const infectedByRegionData = JSON.parse($("#js-region-map-data").attr("data-map"));
     const infectedDailyData = JSON.parse($("#js-total-persons-data").attr("data-barchart"));
-    const regionQuarantineData = JSON.parse($("#js-region-quarantine-data").attr("data-barchart"));
+    const regionQuarantineData = JSON.parse($("#js-region-quarantine-data").attr("data-barchart") || "[]");
     const regionQuarantine = regionQuarantineData.map(val => ({
         reportDate: parseDateToUTC(val.key.replace("Hlášení k ", "")).toISOString(),
         regionData: val.values.map(({x, y}) => ({regionName: x, value: y}))
