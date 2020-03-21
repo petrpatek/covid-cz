@@ -86,6 +86,7 @@ Apify.main(async () => {
                 value: y,
             })),
         })),
+        protectionSuppliesSummary: tableData,
         sourceUrl: url,
         lastUpdatedAtSource: lastUpdatedParsed.toISOString(),
         lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
