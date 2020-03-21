@@ -59,7 +59,11 @@ Apify.main(async () => {
     $(protectionSuppliesSummaryTable).find("tbody tr").each((index, element)=>{
         const rowData = {};
         $(element).find("td").each((i, el)=>{
-            rowData[headers[i]] = toNumber($(el).text().trim());
+            if(i>=1) {
+                rowData[headers[i]] = toNumber($(el).text().trim());
+            }else{
+                rowData[headers[i]] = $(el).text().trim();
+            }
         });
         tableData.push(rowData);
     });
@@ -86,7 +90,7 @@ Apify.main(async () => {
                 value: y,
             })),
         })),
-        protectionSuppliesSummary: tableData,
+       // protectionSuppliesSummary: tableData,
         sourceUrl: url,
         lastUpdatedAtSource: lastUpdatedParsed.toISOString(),
         lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
