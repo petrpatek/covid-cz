@@ -2,7 +2,7 @@ const Apify = require('apify');
 const cheerio = require("cheerio");
 const getDataFromIdnes = require("./idnes");
 const toNumber = (str) => {
-    return parseInt(str.replace(",", ""), 10)
+    return parseInt(str.replace(",", "").replace(" ", ""), 10)
 };
 
 const parseDateToUTC = (dateString) => {
@@ -74,9 +74,9 @@ Apify.main(async () => {
 
     const now = new Date();
     const data = {
-        totalTested: toNumber(totalTested.replace(" ", "")),
+        totalTested: toNumber(totalTested),
         infected: toNumber(infected),
-        recovered: toNumber(recovered.replace(" ", "")),
+        recovered: toNumber(recovered),
         totalPositiveTests: connectDataFromGraph(infectedData),
         numberOfTestedGraph: connectDataFromGraph(numberOfTestedData),
         infectedByRegion: infectedByRegionData.map(({name, value}) => ({name, value})),
