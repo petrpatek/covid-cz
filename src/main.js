@@ -35,6 +35,7 @@ Apify.main(async () => {
     const totalTested = $("#count-test").text().trim();
     const infected = $("p#count-sick").eq(0).text().trim();
     const recovered = $("#count-recover").text().trim();
+    const deceased = $("#count-dead").text().trim();
     const lastUpdated = $("#last-modified-datetime").text().trim().replace("Poslední aktualizace: ", "").replace(/\u00a0/g, "");
     const parts = lastUpdated.split("v");
     const infectedData = JSON.parse($("#js-cummulative-total-persons-data").attr("data-linechart"));
@@ -77,6 +78,7 @@ Apify.main(async () => {
         totalTested: toNumber(totalTested),
         infected: toNumber(infected),
         recovered: toNumber(recovered),
+        deceased: toNumber(deceased),
         totalPositiveTests: connectDataFromGraph(infectedData),
         numberOfTestedGraph: connectDataFromGraph(numberOfTestedData),
         infectedByRegion: infectedByRegionData.map(({name, value}) => ({name, value})),
