@@ -75,7 +75,7 @@ Apify.main(async () => {
     const now = new Date();
     const data = {
         totalTested: toNumber(totalTested.replace(" ", "")),
-        infected: toNumber(infected),
+        infected: toNumber(infected.replace(" ", "")),
         recovered: toNumber(recovered.replace(" ", "")),
         totalPositiveTests: connectDataFromGraph(infectedData),
         numberOfTestedGraph: connectDataFromGraph(numberOfTestedData),
