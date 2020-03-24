@@ -14,11 +14,12 @@ const getDataFromIdnes = async ()=>{
         const totalDeaths = root.find(data => data.hasOwnProperty("mrtvych"));
         const totalCured = root.find(data => data.hasOwnProperty("uzdravenych"));
         const totalTested = root.find(data => data.hasOwnProperty("testovanych"));
+        const localeTextNumberToInt = txt => parseInt(txt.replace(" ", ""), 10);
         infectedByBabisNewspapers = {
-            totalInfected: parseInt(totalInfected.nakazenych, 10),
-            totalDeaths: parseInt(totalDeaths.mrtvych, 10),
-            totalCured: parseInt(totalCured.uzdravenych, 10),
-            totalTested: parseInt(totalTested.testovanych.replace(" ", ""), 10),
+            totalInfected: localeTextNumberToInt(totalInfected.nakazenych),
+            totalDeaths: localeTextNumberToInt(totalDeaths.mrtvych),
+            totalCured: localeTextNumberToInt(totalCured.uzdravenych),
+            totalTested: localeTextNumberToInt(totalTested.testovanych),
         }
     } catch (e) {
         console.log("Could not get data from Idnes", e);
