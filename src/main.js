@@ -48,23 +48,31 @@ Apify.main(async () => {
     const sourceOfInfectionData = JSON.parse($("#js-total-foreign-countries-data").attr("data-barchart"));
     const sexAgeData = JSON.parse($("#js-total-sex-age-data").attr("data-barchart"));
     const protectionSuppliesSummaryTable = $(".static-table__container table");
+    const hospitalizationTable = $(".static-table__container table.equipmentTable").eq(0);
 
     // Table with supplies
     const headers = [];
-    const tableData = [];
-    $(protectionSuppliesSummaryTable).find("thead th").each((idex, element)=>{
+    const hospitalizationTableData = [];
+    $(hospitalizationTable).find("thead th").each((idex, element) => {
         headers.push($(element).text().trim())
     });
-    $(protectionSuppliesSummaryTable).find("tbody tr").each((index, element)=>{
-        const rowData = {};
-        $(element).find("td").each((i, el)=>{
-            if(i>=1) {
-                rowData[headers[i]] = toNumber($(el).text().trim());
-            }else{
-                rowData[headers[i]] = $(el).text().trim();
+    hospitalizationTableData.push(headers);
+
+    $(hospitalizationTable).find("tbody tr").each((index, element) => {
+        const rowData = [];
+        $(element).find("td").each((i, el) => {
+            const text = $(el).text().trim();
+            if (i >= 1) {
+                rowData.push(text.includes("%") ? text : toNumber(text));
+            } else {
+                const split = text.split(".");
+                let reportDate = new Date(`${split[1]}.${split[0]}.${split[2]}`);
+                reportDate = new Date(Date.UTC(reportDate.getFullYear(), reportDate.getMonth(), reportDate.getDate()));
+
+                rowData.push(reportDate.toISOString());
             }
         });
-        tableData.push(rowData);
+        hospitalizationTableData.push(rowData);
     });
 
     const lastUpdated = $("#last-modified-datetime").text().trim().replace("k", "").replace(/\u00a0/g, "");
@@ -81,7 +89,7 @@ Apify.main(async () => {
         deceased: toNumber(deceased),
         totalPositiveTests: connectDataFromGraph(infectedData),
         numberOfTestedGraph: connectDataFromGraph(numberOfTestedData),
-        infectedByRegion: infectedByRegionData.values.map(({x, y}) => ({name:x, value:y})),
+        infectedByRegion: infectedByRegionData.values.map(({x, y}) => ({name: x, value: y})),
         infectedDaily: connectDataFromGraph(infectedDailyData),
         regionQuarantine,
         countryOfInfection: sourceOfInfectionData.values.map((value) => ({countryName: value.x, value: value.y})),
@@ -92,8 +100,9 @@ Apify.main(async () => {
                 value: y,
             })),
         })),
-       // protectionSuppliesSummary: tableData,
+        // protectionSuppliesSummary: tableData,
         sourceUrl: url,
+        hospitalizationData: hospitalizationTableData,
         lastUpdatedAtSource: lastUpdatedParsed.toISOString(),
         lastUpdatedAtApify: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes())).toISOString(),
         readMe: "https://apify.com/petrpatek/covid-cz",
