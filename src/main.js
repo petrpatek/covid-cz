@@ -36,9 +36,12 @@ Apify.main(async () => {
     const infected = $("p#count-sick").eq(0).text().trim();
     const recovered = $("#count-recover").text().trim();
     const deceased = $("#count-dead").text().trim();
+    const hospitalized = $("#count-hospitalization").text().trim();
+    const active = $("#count-active").text().trim();
     const infectedData = JSON.parse($("#js-cummulative-total-persons-data").attr("data-linechart"));
     const numberOfTestedData = JSON.parse($("#js-cummulative-total-tests-data").attr("data-linechart"));
     const infectedByRegionData = JSON.parse($("#js-total-isin-regions-data").attr("data-barchart"));
+    const deathsByRegionData = JSON.parse($("#js-total-region-died-data").attr("data-barchart"));
     const infectedDailyData = JSON.parse($("#js-total-persons-data").attr("data-barchart"));
     const regionQuarantineData = JSON.parse($("#js-region-quarantine-data").attr("data-barchart") || "[]");
     const regionQuarantine = regionQuarantineData.map(val => ({
@@ -81,15 +84,20 @@ Apify.main(async () => {
     let lastUpdatedParsed = new Date(`${splited[1]}.${splited[0]}.${splited[2]} ${parts[1].replace("h", "").replace(".", ":")}`);
     lastUpdatedParsed = new Date(Date.UTC(lastUpdatedParsed.getFullYear(), lastUpdatedParsed.getMonth(), lastUpdatedParsed.getDate(), lastUpdatedParsed.getHours() - 1, lastUpdatedParsed.getMinutes()));
 
+    const critical = hospitalizationTableData[1][2];
     const now = new Date();
     const data = {
         totalTested: toNumber(totalTested),
         infected: toNumber(infected),
         recovered: toNumber(recovered),
         deceased: toNumber(deceased),
+        hospitalized: toNumber(hospitalized),
+        active: toNumber(active),
+        critical,
         totalPositiveTests: connectDataFromGraph(infectedData),
         numberOfTestedGraph: connectDataFromGraph(numberOfTestedData),
         infectedByRegion: infectedByRegionData.values.map(({x, y}) => ({name: x, value: y})),
+        deceasedByRegion: deathsByRegionData.values.map(({x, y}) => ({name: x, value: y})),
         infectedDaily: connectDataFromGraph(infectedDailyData),
         regionQuarantine,
         countryOfInfection: sourceOfInfectionData.values.map((value) => ({countryName: value.x, value: value.y})),
