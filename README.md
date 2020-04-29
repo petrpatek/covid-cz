@@ -1,3 +1,4 @@
+# EDIT: The repository was moved here https://github.com/apifytech/covid-19
 # Coronavirus stats in the Czech Republic
 Actor gets an actual number of examined and infected people in the Czech Republic from https://onemocneni-aktualne.mzcr.cz/covid-19
 
